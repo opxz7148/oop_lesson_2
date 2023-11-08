@@ -3,17 +3,26 @@ import csv, os
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-cities = []
-with open(os.path.join(__location__, 'Cities.csv')) as f:
-    rows = csv.DictReader(f)
-    for r in rows:
-        cities.append(dict(r))
+def import_csv(file_name):
+    temp = []
+    with open(os.path.join(__location__, file_name)) as f:
+        rows = csv.DictReader(f)
+        for r in rows:
+            temp.append(dict(r))
+    return temp
 
-countries = []
-with open(os.path.join(__location__, 'Countries.csv')) as f:
-    rows = csv.DictReader(f)
-    for r in rows:
-        countries.append(dict(r))
+
+
+cities = import_csv("Cities.csv")
+
+countries = import_csv('Countries.csv')
+
+titanic = import_csv('Titanic.csv')
+
+players = import_csv('Players.csv')
+
+teams = import_csv('Teams.csv')
+
 
 class DB:
     def __init__(self):
@@ -43,6 +52,7 @@ class Table:
                     dict2 = copy.deepcopy(item2)
                     dict1.update(dict2)
                     joined_table.table.append(dict1)
+
         return joined_table
     
     def filter(self, condition):
@@ -71,11 +81,21 @@ class Table:
     def __str__(self):
         return self.table_name + ':' + str(self.table)
 
+
 table1 = Table('cities', cities)
 table2 = Table('countries', countries)
+table3 = Table('players', players)
+table4 = Table('teams', teams)
+table5 = Table('titanic', titanic)
+
 my_DB = DB()
+
 my_DB.insert(table1)
 my_DB.insert(table2)
+my_DB.insert(table3)
+my_DB.insert(table4)
+my_DB.insert(table5)
+
 my_table1 = my_DB.search('cities')
 
 print("Test filter: only filtering out cities in Italy") 
