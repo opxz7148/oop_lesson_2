@@ -1,4 +1,5 @@
 import csv, os
+from combination_gen import gen_comb_list
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -35,7 +36,7 @@ class DB:
             if table.table_name == table_name:
                 return table
         return None
-    
+
 import copy
 class Table:
     def __init__(self, table_name, table):
@@ -65,7 +66,7 @@ class Table:
                     joined_table.table.append(dict1)
 
         return joined_table
-    
+
     def filter(self, condition):
         filtered_table = Table(self.table_name + '_filtered', [])
         for item1 in self.table:
@@ -81,7 +82,7 @@ class Table:
             else:
                 temps.append(item1[aggregation_key])
         return function(temps)
-    
+
     def select(self, attributes_list):
         temps = []
         for item1 in self.table:
@@ -92,6 +93,62 @@ class Table:
             temps.append(dict_temp)
         return temps
 
+    def pivot_table(self, key_to_pivot_list, keys_to_aggreagte_list, aggregate_func_list):
+
+
+        # First create a list of unique values for each key
+
+        unique_values_list = []
+
+        for key in key_to_pivot_list:
+            temp = []
+            for passenger in self.table:
+                if passenger[key] not in temp:
+                    temp.append(passenger[key])
+            unique_values_list.append(temp)
+
+        # Here is an example of unique_values_list for
+        # keys_to_pivot_list = ['embarked', 'gender', 'class']
+        # unique_values_list =
+        # [['Southampton', 'Cherbourg', 'Queenstown'], ['M', 'F'], ['3', '2','1']]
+
+        # Get the combination of unique_values_list
+        # You will make use of the function you implemented in Task 2
+
+        # code that makes a call to combination_gen.gen_comb_list
+        combination = gen_comb_list(unique_values_list)
+
+        # Example output:
+        # [['Southampton', 'M', '3'],
+        #  ['Cherbourg', 'M', '3'],
+        #  ...
+        #  ['Queenstown', 'F', '1']]
+
+        pivot_table = []
+
+        # code that filters each combination
+        for comb in combination:
+            temp = [comb]
+            val_temp = []
+
+            filtered = self
+            for index in range(len(comb)):
+                filtered = filtered.filter(lambda passenger : passenger[key_to_pivot_list[index]] == comb[index])
+
+            for index in range(len(keys_to_aggreagte_list)):
+                val_temp.append(filtered.aggregate(aggregate_func_list[index], keys_to_aggreagte_list[index]))
+
+            temp.append(val_temp)
+            pivot_table.append(temp)
+
+
+        # for each filter table applies the relevant aggregate functions
+        # to keys to aggregate
+        # the aggregate functions is listed in aggregate_func_list
+        # to keys to aggregate is listed in keys_to_aggregate_list
+
+        # return a pivot table
+        return Table("pivot table", pivot_table)
     def __str__(self):
         return self.table_name + ':' + str(self.table)
 
@@ -176,12 +233,34 @@ print(female_survive_rate)
 
 print("\n====================================================================\n")
 
-#Find the total number of male passengers embarked at Southampton
+# Find the total number of male passengers embarked at Southampton
 male_at_southam = table5.filter(lambda passenger: passenger["gender"] == 'M' and passenger["embarked"] == "Southampton")
 print(*male_at_southam.table, sep="\n")
 
 print("\n====================================================================\n")
 
+# Test pivot table
+my_pivot = table5.pivot_table(['embarked', 'gender', 'class'], ['fare', 'fare', 'fare', 'last'], [lambda x: min(x), lambda x: max(x), lambda x: sum(x)/len(x), lambda x: len(x)])
+print(*my_pivot.table, sep="\n")
+
+print("\n====================================================================\n")
+
+# Test pivot table 2
+my_pivot2 = table3.pivot_table(['position'], ['passes', 'shots'], [lambda passes: sum(passes) / len(passes), lambda shots: sum(shots) / len(shots)])
+print(*my_pivot2.table, sep="\n")
+
+print("\n====================================================================\n")
+
+# Test pivot table 3
+# print(*my_pivot3.table, sep="\n")
+
+print("\n====================================================================\n")
+
+# Test pivot table 4
+my_pivot3 = table5.pivot_table(['class', 'gender', 'survived'], ['survived', 'fare'], [lambda survived: len(survived), lambda fare: sum(fare) / len(fare)])
+print(*my_pivot3.table, sep="\n")
+
+print("\n====================================================================\n")
 # my_table1 = my_DB.search('cities')
 #
 # print("Test filter: only filtering out cities in Italy")

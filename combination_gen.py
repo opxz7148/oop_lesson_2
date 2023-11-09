@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+
 def gen_comb_list(lists):
     result = []
 
@@ -28,7 +29,3 @@ def gen_comb_list(lists):
                         result.append(new_comb)
                 return result
 
-
-ls = [[1, 2, 3], [4, 5], [6, 7, 8], [9, 10, 11, 12]]
-
-print(gen_comb_list(ls))
