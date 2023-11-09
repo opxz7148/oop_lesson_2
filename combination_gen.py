@@ -21,10 +21,10 @@ def gen_comb_list(lists):
                     copy_lsts = deepcopy(lists)
                     copy_lsts[i] = [j]
                     new_comb = gen_comb_list(copy_lsts)
-                    if isinstance((new_comb[0]), int):
-                        result.append(new_comb)
-                    else:
+                    if isinstance((new_comb[0]), list):
                         result += new_comb
+                    else:
+                        result.append(new_comb)
                 return result
 
 ls = [[1,2,3], [4,5], [6, 7, 8]]
