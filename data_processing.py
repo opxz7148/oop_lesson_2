@@ -41,7 +41,19 @@ class Table:
     def __init__(self, table_name, table):
         self.table_name = table_name
         self.table = table
-    
+
+    def __floatable(self, element):
+
+        if element is None:
+            return False
+
+        try:
+            float(element)
+            return True
+
+        except ValueError:
+            return False
+
     def join(self, other_table, common_key):
         joined_table = Table(self.table_name + '_joins_' + other_table.table_name, [])
         for item1 in self.table:
@@ -60,11 +72,14 @@ class Table:
             if condition(item1):
                 filtered_table.table.append(item1)
         return filtered_table
-    
+
     def aggregate(self, function, aggregation_key):
         temps = []
         for item1 in self.table:
-            temps.append(float(item1[aggregation_key]))
+            if self.__floatable(item1[aggregation_key]):
+                temps.append(float(item1[aggregation_key]))
+            else:
+                temps.append(item1[aggregation_key])
         return function(temps)
     
     def select(self, attributes_list):
@@ -158,6 +173,14 @@ print("Male survive rate")
 print(male_survive_rate)
 print("female survive rate")
 print(female_survive_rate)
+
+print("\n====================================================================\n")
+
+#Find the total number of male passengers embarked at Southampton
+male_at_southam = table5.filter(lambda passenger: passenger["gender"] == 'M' and passenger["embarked"] == "Southampton")
+print(*male_at_southam.table, sep="\n")
+
+print("\n====================================================================\n")
 
 # my_table1 = my_DB.search('cities')
 #
